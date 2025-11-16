@@ -10,13 +10,15 @@ ENV VITE_API_URL=${VITE_API_URL}
 WORKDIR /app
 
 # Copy package files
-COPY package*.json ./
+# If build context is project root, copy from frontend/ directory
+COPY frontend/package*.json ./
 
 # Install dependencies
 RUN npm ci
 
 # Copy source code
-COPY . .
+# If build context is project root, copy from frontend/ directory
+COPY frontend/ ./
 
 # Build the application
 RUN npm run build

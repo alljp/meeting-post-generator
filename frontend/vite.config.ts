@@ -5,11 +5,10 @@ import { fileURLToPath } from 'url'
 import { existsSync, statSync } from 'fs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-// In Docker: WORKDIR is /src, vite.config.ts is at /src/vite.config.ts
-// When COPY . . runs, it copies the frontend/ directory contents to /src/
-// So frontend/src/ becomes /src/src/
-// Therefore @/lib/api should resolve to /src/src/lib/api.ts
-// __dirname = /src, so path.resolve(__dirname, 'src') = /src/src
+// In Docker: WORKDIR is /app, vite.config.ts is at /app/vite.config.ts
+// When COPY . . runs, it copies the frontend/ directory contents to /app/
+// So frontend/src/lib/api.ts becomes /app/src/lib/api.ts
+// __dirname = /app, so path.resolve(__dirname, 'src') = /app/src
 const srcPath = path.resolve(__dirname, 'src')
 
 // Custom resolver plugin for @/ aliases to ensure proper extension resolution
@@ -62,12 +61,27 @@ const aliasResolver = () => {
         // Directory doesn't exist
       }
       
-      // If we get here, the file doesn't exist - throw an error with helpful message
-      // This prevents Vite from trying to resolve without extension
+      // If we get here, the file doesn't exist - try alternative locations
+      // Sometimes files might be in a nested src/src/ structure
+      const altSrcPath = path.resolve(__dirname, 'src', 'src')
+      if (existsSync(altSrcPath)) {
+        for (const ext of extensions) {
+          const fullPath = path.resolve(altSrcPath, relativePath + ext)
+          if (existsSync(fullPath)) {
+            return fullPath
+          }
+        }
+      }
+      
+      // If still not found, throw an error with helpful message
       const triedPaths = extensions.map(ext => path.join(srcPath, relativePath + ext))
+      const altPaths = existsSync(altSrcPath) ? 
+        extensions.map(ext => path.join(altSrcPath, relativePath + ext)) : []
       const errorMsg = `[alias-resolver] Could not find file for '@/${relativePath}'. ` +
         `Tried paths:\n${triedPaths.map(p => `  - ${p}`).join('\n')}\n` +
+        (altPaths.length > 0 ? `Alternative paths:\n${altPaths.map(p => `  - ${p}`).join('\n')}\n` : '') +
         `Source directory: ${srcPath}\n` +
+        `__dirname: ${__dirname}\n` +
         `Current working directory: ${process.cwd()}`
       throw new Error(errorMsg)
     },

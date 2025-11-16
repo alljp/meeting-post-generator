@@ -5,7 +5,11 @@ import { fileURLToPath } from 'url'
 import { existsSync, statSync } from 'fs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const srcPath = path.resolve(__dirname, './src')
+// In Docker: WORKDIR is /src, vite.config.ts is at /src/vite.config.ts
+// The src/ directory is at /src/src/ relative to WORKDIR
+// Use __dirname to get the directory where vite.config.ts is located (/src)
+// Then resolve 'src' relative to that, which gives us /src/src
+const srcPath = path.resolve(__dirname, 'src')
 
 // Custom resolver plugin for @/ aliases to ensure proper extension resolution
 // This is needed for Docker/Linux builds where path resolution may behave differently

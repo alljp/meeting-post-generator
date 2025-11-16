@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { Navigate } from 'react-router-dom'
 import { useAuthStore } from '../store/auth'
-import api from '../lib/api'
+import api from '@/lib'
 
 interface ProtectedRouteProps {
   children: React.ReactNode

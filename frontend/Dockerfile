@@ -7,7 +7,7 @@ ARG VITE_API_URL
 ENV VITE_API_URL=${VITE_API_URL}
 
 # Set working directory
-WORKDIR /app
+WORKDIR /src
 
 # Copy package files
 COPY package*.json ./

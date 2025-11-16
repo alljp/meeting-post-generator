@@ -27,16 +27,32 @@ FROM nginx:alpine
 # Copy built assets from builder
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Copy nginx configuration
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Copy nginx configuration as a template
+# nginx:alpine processes .template files in /etc/nginx/templates/ and creates configs in /etc/nginx/conf.d/
+# This allows environment variable substitution
+COPY nginx.conf /etc/nginx/templates/default.conf.template
 
-# Expose port
+# Copy healthcheck script
+COPY healthcheck.sh /healthcheck.sh
+RUN chmod +x /healthcheck.sh
+
+# nginx:alpine's docker-entrypoint.sh will automatically:
+# 1. Process templates from /etc/nginx/templates/*.template
+# 2. Substitute environment variables (like ${PORT:-80})
+# 3. Create configs in /etc/nginx/conf.d/
+# 4. Start nginx
+# No custom entrypoint script needed - nginx handles it automatically
+
+# Expose port (Railway will set PORT dynamically)
 EXPOSE 80
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD wget --quiet --tries=1 --spider http://localhost/health || exit 1
+# Health check - uses Railway's PORT environment variable
+HEALTHCHECK --interval=30s --timeout=3s --start-period=15s --retries=3 \
+    CMD /healthcheck.sh
 
-# Start nginx
-CMD ["nginx", "-g", "daemon off;"]
+# nginx's default entrypoint will:
+# 1. Process /etc/nginx/templates/default.conf.template
+# 2. Substitute ${PORT:-80} with Railway's PORT environment variable
+# 3. Create /etc/nginx/conf.d/default.conf
+# 4. Start nginx on the correct port
 

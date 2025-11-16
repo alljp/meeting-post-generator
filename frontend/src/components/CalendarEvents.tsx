@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { format, formatDistance } from 'date-fns'
 import { Calendar, Video, MapPin, RefreshCw, Loader2 } from 'lucide-react'
 import { useToastContext } from '../contexts/ToastContext'
-import api from '../lib/api'
+import api from '@/lib'
 
 interface CalendarEvent {
   id: number

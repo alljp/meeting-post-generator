@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { X, Save, Loader2 } from 'lucide-react'
 import { useToastContext } from '../contexts/ToastContext'
-import api from '../lib/api'
+import api from '@/lib'
 
 const automationSchema = z.object({
   name: z.string().min(1, 'Name is required').max(100, 'Name must be less than 100 characters'),

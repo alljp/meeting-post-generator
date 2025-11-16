@@ -8,7 +8,7 @@ import {
 } from 'lucide-react'
 import { useToastContext } from '../contexts/ToastContext'
 import ConfirmDialog from '../components/ConfirmDialog'
-import api from '../lib/api'
+import api from '@/lib'
 import PlatformIcon from '../components/PlatformIcon'
 
 interface Attendee {

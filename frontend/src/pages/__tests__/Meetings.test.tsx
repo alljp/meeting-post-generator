@@ -8,10 +8,10 @@ import { BrowserRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import React from 'react'
 import Meetings from '../Meetings'
-import api from '../../lib/api'
+import api from '@/lib'
 
 // Mock the API
-vi.mock('../../lib/api', () => ({
+vi.mock('@/lib', () => ({
   default: {
     get: vi.fn(),
   },

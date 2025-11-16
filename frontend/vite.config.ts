@@ -2,7 +2,7 @@ import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 import path from 'path'
 import { fileURLToPath } from 'url'
-import { existsSync, statSync } from 'fs'
+import { existsSync, statSync, readdirSync } from 'fs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 // In Docker: WORKDIR is /app, vite.config.ts is at /app/vite.config.ts
@@ -73,17 +73,10 @@ const aliasResolver = () => {
         }
       }
       
-      // If still not found, throw an error with helpful message
-      const triedPaths = extensions.map(ext => path.join(srcPath, relativePath + ext))
-      const altPaths = existsSync(altSrcPath) ? 
-        extensions.map(ext => path.join(altSrcPath, relativePath + ext)) : []
-      const errorMsg = `[alias-resolver] Could not find file for '@/${relativePath}'. ` +
-        `Tried paths:\n${triedPaths.map(p => `  - ${p}`).join('\n')}\n` +
-        (altPaths.length > 0 ? `Alternative paths:\n${altPaths.map(p => `  - ${p}`).join('\n')}\n` : '') +
-        `Source directory: ${srcPath}\n` +
-        `__dirname: ${__dirname}\n` +
-        `Current working directory: ${process.cwd()}`
-      throw new Error(errorMsg)
+      // If still not found, return null to let Vite's built-in alias resolver try
+      // This allows Vite to use the resolve.alias configuration as fallback
+      // Vite will handle extension resolution automatically
+      return null
     },
   }
 }
@@ -92,8 +85,10 @@ const aliasResolver = () => {
 export default defineConfig({
   plugins: [aliasResolver(), react()],
   resolve: {
-    // Don't use alias here - let our custom plugin handle @/ imports
-    // This prevents Vite from trying to resolve without extensions when plugin returns null
+    // Use alias here as fallback - Vite will handle extension resolution
+    alias: {
+      '@': srcPath,
+    },
     extensions: ['.mjs', '.js', '.mts', '.ts', '.jsx', '.tsx', '.json'],
   },
   server: {

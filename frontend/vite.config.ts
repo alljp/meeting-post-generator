@@ -2,7 +2,7 @@ import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 import path from 'path'
 import { fileURLToPath } from 'url'
-import { existsSync } from 'fs'
+import { existsSync, statSync } from 'fs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const srcPath = path.resolve(__dirname, './src')
@@ -14,31 +14,57 @@ const aliasResolver = () => {
     name: 'alias-resolver',
     enforce: 'pre' as const,
     resolveId(id: string, importer: string | undefined) {
-      if (id.startsWith('@/')) {
-        const relativePath = id.replace('@/', '').replace(/\\/g, '/')
-        const extensions = ['.ts', '.tsx', '.js', '.jsx', '.mjs', '.mts', '.json']
-        
-        // Try with each extension
-        for (const ext of extensions) {
-          const fullPath = path.resolve(srcPath, relativePath + ext)
+      // Only handle @/ imports
+      if (!id.startsWith('@/')) {
+        return null
+      }
+      
+      const relativePath = id.replace('@/', '').replace(/\\/g, '/')
+      const extensions = ['.ts', '.tsx', '.js', '.jsx', '.mjs', '.mts', '.json']
+      
+      // Try with each extension
+      for (const ext of extensions) {
+        const fullPath = path.resolve(srcPath, relativePath + ext)
+        try {
           if (existsSync(fullPath)) {
-            // Return absolute path - Vite will handle it correctly
-            return fullPath
+            const stats = statSync(fullPath)
+            if (stats.isFile()) {
+              // Return absolute path - this prevents Vite from trying to load without extension
+              return fullPath
+            }
           }
+        } catch (err) {
+          // File doesn't exist, continue to next extension
+          continue
         }
-        
-        // Try as directory with index file
-        const dirPath = path.resolve(srcPath, relativePath)
+      }
+      
+      // Try as directory with index file
+      const dirPath = path.resolve(srcPath, relativePath)
+      try {
         if (existsSync(dirPath)) {
-          for (const ext of extensions) {
-            const indexPath = path.resolve(dirPath, `index${ext}`)
-            if (existsSync(indexPath)) {
-              return indexPath
+          const stats = statSync(dirPath)
+          if (stats.isDirectory()) {
+            for (const ext of extensions) {
+              const indexPath = path.resolve(dirPath, `index${ext}`)
+              if (existsSync(indexPath)) {
+                return indexPath
+              }
             }
           }
         }
+      } catch (err) {
+        // Directory doesn't exist
       }
-      return null
+      
+      // If we get here, the file doesn't exist - throw an error with helpful message
+      // This prevents Vite from trying to resolve without extension
+      const triedPaths = extensions.map(ext => path.join(srcPath, relativePath + ext))
+      const errorMsg = `[alias-resolver] Could not find file for '@/${relativePath}'. ` +
+        `Tried paths:\n${triedPaths.map(p => `  - ${p}`).join('\n')}\n` +
+        `Source directory: ${srcPath}\n` +
+        `Current working directory: ${process.cwd()}`
+      throw new Error(errorMsg)
     },
   }
 }
@@ -47,9 +73,8 @@ const aliasResolver = () => {
 export default defineConfig({
   plugins: [aliasResolver(), react()],
   resolve: {
-    alias: {
-      '@': srcPath,
-    },
+    // Don't use alias here - let our custom plugin handle @/ imports
+    // This prevents Vite from trying to resolve without extensions when plugin returns null
     extensions: ['.mjs', '.js', '.mts', '.ts', '.jsx', '.tsx', '.json'],
   },
   server: {

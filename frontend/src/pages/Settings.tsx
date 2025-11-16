@@ -6,7 +6,7 @@ import { Save, Loader2, Clock, Link2, X, Mail, Settings as SettingsIcon } from '
 import { useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useToastContext } from '../contexts/ToastContext'
-import api from '@/lib'
+import api from '@/lib/api.ts'
 import AutomationList from '../components/AutomationList'
 
 const settingsSchema = z.object({

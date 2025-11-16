@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { Plus, Edit2, Trash2, ToggleLeft, ToggleRight, Loader2, Sparkles } from 'lucide-react'
 import { useToastContext } from '../contexts/ToastContext'
-import api from '@/lib'
+import api from '@/lib/api.ts'
 import AutomationForm from './AutomationForm'
 import ConfirmDialog from './ConfirmDialog'
 

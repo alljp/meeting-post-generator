@@ -1,6 +1,11 @@
 # Multi-stage build for production-ready React application
 FROM node:18-alpine as builder
 
+# Accept build arguments for environment variables
+# Railway will pass this as a build argument
+ARG VITE_API_URL
+ENV VITE_API_URL=${VITE_API_URL}
+
 # Set working directory
 WORKDIR /app
 

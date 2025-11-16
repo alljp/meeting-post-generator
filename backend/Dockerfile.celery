@@ -1,4 +1,5 @@
-# Multi-stage build for production-ready FastAPI application
+# Dockerfile for Celery Worker
+# This is the same as the backend Dockerfile but runs Celery instead
 FROM python:3.11-slim as builder
 
 # Set working directory
@@ -33,21 +34,10 @@ COPY --from=builder /usr/local/bin /usr/local/bin
 # Copy application code
 COPY --chown=appuser:appuser . .
 
-# Copy and set permissions for entrypoint script
-COPY --chown=appuser:appuser entrypoint.sh /app/entrypoint.sh
-RUN chmod +x /app/entrypoint.sh
-
 # Switch to non-root user
 USER appuser
 
-# Expose port
-EXPOSE 8000
-
-# Health check (uses PORT env var, defaults to 8000)
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD sh -c "python -c \"import requests; import os; port=os.getenv('PORT', '8000'); requests.get(f'http://localhost:{port}/health')\"" || exit 1
-
-# Run the application using entrypoint script
-# Railway sets PORT environment variable, default to 8000 if not set
-ENTRYPOINT ["/app/entrypoint.sh"]
+# Run Celery worker
+# Note: Make sure app.tasks module exists and is properly configured
+CMD ["celery", "-A", "app.tasks", "worker", "--loglevel=info", "--concurrency=4"]
 

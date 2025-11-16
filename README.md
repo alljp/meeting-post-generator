@@ -88,10 +88,32 @@ npm run dev
 ## 📚 Documentation
 
 - [PROJECT_PLAN.md](./PROJECT_PLAN.md) - Complete implementation plan with phases, API design, and architecture
+- [DEPLOYMENT_PLAN.md](../DEPLOYMENT_PLAN.md) - Comprehensive deployment guide
+- [DEPLOYMENT_QUICK_START.md](../DEPLOYMENT_QUICK_START.md) - Quick start deployment guide
+- [DEPLOYMENT_SUMMARY.md](../DEPLOYMENT_SUMMARY.md) - Deployment quick reference
+
+## 🚀 Deployment
+
+For deploying the application to production, see:
+- **[DEPLOYMENT_QUICK_START.md](../DEPLOYMENT_QUICK_START.md)** - Step-by-step deployment instructions
+- **[DEPLOYMENT_PLAN.md](../DEPLOYMENT_PLAN.md)** - Complete deployment options and strategies
+
+Quick deployment using Docker Compose:
+```bash
+# Configure environment variables
+cd backend
+cp .env.production.example .env
+# Edit .env with production values
+
+# Deploy
+cd ../..
+./deploy.sh production
+```
 
 ## 🔐 Environment Variables
 
 See PROJECT_PLAN.md for complete list of required environment variables.
+For production deployment, see DEPLOYMENT_PLAN.md for environment configuration.
 
 ## 🧪 Testing
 

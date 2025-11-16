@@ -11,9 +11,18 @@ echo "Running database migrations..."
 alembic upgrade head
 
 echo "Migrations completed successfully!"
-echo "Starting uvicorn server on port ${PORT:-8000}..."
+
+# Debug: Show PORT value (Railway sets this automatically)
+if [ -z "$PORT" ]; then
+    echo "WARNING: PORT environment variable is not set, using default 8000"
+    ACTUAL_PORT=8000
+else
+    echo "PORT environment variable is set to: $PORT"
+    ACTUAL_PORT=$PORT
+fi
+echo "Starting uvicorn server on port ${ACTUAL_PORT}..."
 
 # Start the server
 # Railway sets PORT environment variable
-exec uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000} --workers ${WORKERS:-4}
+exec uvicorn app.main:app --host 0.0.0.0 --port ${ACTUAL_PORT} --workers ${WORKERS:-4}
 

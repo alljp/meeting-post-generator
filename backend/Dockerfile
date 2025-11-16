@@ -40,12 +40,11 @@ RUN chmod +x /app/entrypoint.sh
 # Switch to non-root user
 USER appuser
 
-# Expose port
+# Expose port (Railway will use PORT env var, but we expose 8000 as fallback)
 EXPOSE 8000
 
-# Health check (uses PORT env var, defaults to 8000)
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD sh -c "python -c \"import requests; import os; port=os.getenv('PORT', '8000'); requests.get(f'http://localhost:{port}/health')\"" || exit 1
+# Note: Railway handles health checks via healthcheckPath in railway.json/toml
+# We don't need Docker HEALTHCHECK as it can conflict with Railway's health check system
 
 # Run the application using entrypoint script
 # Railway sets PORT environment variable, default to 8000 if not set

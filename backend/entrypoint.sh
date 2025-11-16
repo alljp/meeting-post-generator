@@ -4,6 +4,9 @@
 
 set -e
 
+echo "=========================================="
+echo "ENTRYPOINT SCRIPT STARTING"
+echo "=========================================="
 echo "Starting Post-Meeting Generator Backend..."
 echo "Running database migrations..."
 
@@ -24,5 +27,11 @@ echo "Starting uvicorn server on port ${ACTUAL_PORT}..."
 
 # Start the server
 # Railway sets PORT environment variable
+echo "=========================================="
+echo "Starting uvicorn with:"
+echo "  Host: 0.0.0.0"
+echo "  Port: ${ACTUAL_PORT}"
+echo "  Workers: ${WORKERS:-4}"
+echo "=========================================="
 exec uvicorn app.main:app --host 0.0.0.0 --port ${ACTUAL_PORT} --workers ${WORKERS:-4}
 

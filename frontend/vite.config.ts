@@ -6,10 +6,11 @@ import { existsSync, statSync } from 'fs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 // In Docker: WORKDIR is /src, vite.config.ts is at /src/vite.config.ts
-// The src/ directory should be directly in /src (not /src/src)
-// So @/lib/api should resolve to /src/lib/api.ts
-// Use __dirname directly which is /src
-const srcPath = __dirname
+// When COPY . . runs, it copies the frontend/ directory contents to /src/
+// So frontend/src/ becomes /src/src/
+// Therefore @/lib/api should resolve to /src/src/lib/api.ts
+// __dirname = /src, so path.resolve(__dirname, 'src') = /src/src
+const srcPath = path.resolve(__dirname, 'src')
 
 // Custom resolver plugin for @/ aliases to ensure proper extension resolution
 // This is needed for Docker/Linux builds where path resolution may behave differently

@@ -13,16 +13,30 @@ This app helps advisors automatically create and post social media content after
 ## 🏗️ Architecture
 
 ### Backend
-- **FastAPI** (Python) - Modern async API framework
-- **PostgreSQL** - Database with SQLAlchemy ORM
+- **FastAPI** (Python 3.11+) - Modern async API framework
+- **PostgreSQL** - Database with SQLAlchemy ORM (async driver: psycopg)
 - **Celery + Redis** - Background task processing
 - **Alembic** - Database migrations
+- **Pydantic** - Data validation and settings management
+- **AuthLib** - OAuth 2.0 client library
+- **OpenAI API** - AI-powered content generation
 
 ### Frontend
 - **React 18 + TypeScript** - Modern UI framework
-- **Tailwind CSS + shadcn/ui** - Styling and components
-- **React Query** - Server state management
-- **Vite** - Build tool
+- **Vite** - Build tool and dev server
+- **React Router** - Client-side routing
+- **TanStack Query (React Query)** - Server state management and data fetching
+- **Zustand** - Client state management
+- **Tailwind CSS** - Utility-first CSS framework
+- **Lucide React** - Icon library
+- **Axios** - HTTP client
+- **React Hook Form + Zod** - Form handling and validation
+
+### Architecture Patterns
+- **Factory Pattern** - Used in services (AI, Calendar, Social Media) to support multiple providers/strategies
+- **Strategy Pattern** - Implemented for authentication providers (Google OAuth) and social media platforms (LinkedIn, Facebook)
+- **Repository Pattern** - Database models abstracted through SQLAlchemy ORM
+- **Dependency Injection** - FastAPI's dependency injection for API endpoints and database sessions
 
 ## 📋 Key Features
 
@@ -43,20 +57,64 @@ See [PROJECT_PLAN.md](./PROJECT_PLAN.md) for detailed implementation plan.
 ## 📁 Project Structure
 
 ```
-post-meeting-generator/
-├── src/
-│   ├── backend/
-│   │   ├── app/
-│   │   │   ├── api/          # API endpoints
-│   │   │   ├── models/       # Database models
-│   │   │   ├── services/     # Business logic
-│   │   │   ├── tasks/        # Celery tasks
-│   │   │   └── utils/        # Utilities
-│   │   ├── alembic/          # Database migrations
-│   │   └── tests/            # Backend tests
-│   └── frontend/
-│       └── src/              # React application
-├── docker-compose.yml        # Docker compose configuration
+meeting-post-generator/
+├── backend/
+│   ├── app/
+│   │   ├── api/
+│   │   │   └── v1/           # API v1 endpoints (auth, calendar, meetings, recall, settings, social)
+│   │   ├── auth/             # Authentication strategies (Google, etc.)
+│   │   ├── core/             # Core configuration and database setup
+│   │   ├── models/           # SQLAlchemy database models
+│   │   │   ├── automation.py
+│   │   │   ├── calendar_event.py
+│   │   │   ├── generated_post.py
+│   │   │   ├── meeting.py
+│   │   │   ├── settings.py
+│   │   │   ├── social_account.py
+│   │   │   └── user.py
+│   │   ├── services/         # Business logic services
+│   │   │   ├── ai/           # AI service (factory pattern with OpenAI strategy)
+│   │   │   ├── calendar/     # Calendar service (factory pattern with Google strategy)
+│   │   │   ├── social/       # Social media service (factory pattern with LinkedIn/Facebook strategies)
+│   │   │   ├── recall_bot_manager.py
+│   │   │   └── recall_service.py
+│   │   ├── tasks/            # Celery background tasks
+│   │   ├── utils/            # Utility functions (JWT, etc.)
+│   │   └── main.py           # FastAPI application entry point
+│   ├── alembic/              # Database migrations
+│   │   └── versions/         # Migration versions
+│   ├── tests/                # Backend tests (pytest)
+│   ├── requirements.txt      # Python dependencies
+│   ├── Dockerfile            # Backend Docker image
+│   ├── Dockerfile.celery     # Celery worker Docker image
+│   └── alembic.ini           # Alembic configuration
+├── frontend/
+│   ├── src/
+│   │   ├── components/       # React components
+│   │   │   ├── AutomationForm.tsx
+│   │   │   ├── AutomationList.tsx
+│   │   │   ├── CalendarEvents.tsx
+│   │   │   ├── Layout.tsx
+│   │   │   └── ...
+│   │   ├── pages/            # Page components
+│   │   │   ├── Home.tsx
+│   │   │   ├── Login.tsx
+│   │   │   ├── Calendar.tsx
+│   │   │   ├── Meetings.tsx
+│   │   │   ├── MeetingDetail.tsx
+│   │   │   └── Settings.tsx
+│   │   ├── contexts/          # React contexts (ToastContext)
+│   │   ├── hooks/            # Custom React hooks
+│   │   ├── lib/              # API client and utilities
+│   │   ├── store/            # Zustand stores (auth)
+│   │   ├── App.tsx           # Main app component
+│   │   └── main.tsx          # Application entry point
+│   ├── package.json          # Node.js dependencies
+│   ├── vite.config.ts        # Vite configuration
+│   ├── tailwind.config.js    # Tailwind CSS configuration
+│   └── Dockerfile            # Frontend Docker image
+├── docker-compose.yml        # Development Docker Compose configuration
+├── docker-compose.prod.yml   # Production Docker Compose configuration
 └── README.md                 # This file
 ```
 
@@ -70,27 +128,36 @@ post-meeting-generator/
 
 ### Backend Setup
 ```bash
-cd src/backend
+cd meeting-post-generator/backend
 python -m venv venv
 source venv/bin/activate  # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 alembic upgrade head
-uvicorn app.main:app --reload
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
 ### Frontend Setup
 ```bash
-cd src/frontend
+cd meeting-post-generator/frontend
 npm install
 npm run dev
 ```
 
-## 📚 Documentation
+### Docker Compose Setup (Recommended)
+```bash
+# From project root
+docker-compose up -d
 
-- [PROJECT_PLAN.md](./PROJECT_PLAN.md) - Complete implementation plan with phases, API design, and architecture
-- [DEPLOYMENT_PLAN.md](../DEPLOYMENT_PLAN.md) - Comprehensive deployment guide
-- [DEPLOYMENT_QUICK_START.md](../DEPLOYMENT_QUICK_START.md) - Quick start deployment guide
-- [DEPLOYMENT_SUMMARY.md](../DEPLOYMENT_SUMMARY.md) - Deployment quick reference
+# This will start:
+# - PostgreSQL database (port 5432)
+# - Redis (port 6379)
+# - Backend API (port 8000)
+# - Celery worker for background tasks
+```
+
+Note: Make sure to configure your `.env` file in `backend/` with required environment variables before starting the services.
+
+
 
 ## 🚀 Deployment
 
@@ -101,14 +168,18 @@ For deploying the application to production, see:
 Quick deployment using Docker Compose:
 ```bash
 # Configure environment variables
-cd backend
+cd meeting-post-generator/backend
 cp .env.production.example .env
 # Edit .env with production values
 
 # Deploy
 cd ../..
-./deploy.sh production
+docker-compose -f docker-compose.prod.yml up -d
 ```
+
+Or use the deployment scripts:
+- **Linux/Mac**: `./deploy.sh production`
+- **Windows**: `.\deploy.ps1 production`
 
 ## 🔐 Environment Variables
 
@@ -117,8 +188,22 @@ For production deployment, see DEPLOYMENT_PLAN.md for environment configuration.
 
 ## 🧪 Testing
 
-- Backend: `pytest` in `src/backend/` directory
-- Frontend: `npm test` in `src/frontend/` directory
+### Backend Testing
+```bash
+cd meeting-post-generator/backend
+pytest
+```
+
+### Frontend Testing
+```bash
+cd meeting-post-generator/frontend
+npm test
+```
+
+The backend includes comprehensive test coverage for:
+- API endpoints (auth, calendar, meetings, recall, settings, social)
+- Services (AI, calendar, recall, social media)
+- Database models
 
 ## 📝 License
 

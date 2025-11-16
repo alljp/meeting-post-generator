@@ -6,6 +6,8 @@ builder = "DOCKERFILE"
 dockerfilePath = "/frontend/Dockerfile"
 # Build arguments - Railway will pass VITE_API_URL from environment variables
 # Make sure to set VITE_API_URL in Railway dashboard Variables tab
+[build.buildArgs]
+VITE_API_URL = "${{VITE_API_URL}}"
 
 [deploy]
 healthcheckPath = "/health"

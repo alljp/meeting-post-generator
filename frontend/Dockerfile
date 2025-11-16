@@ -1,5 +1,5 @@
 # Multi-stage build for production-ready React application
-FROM node:18-alpine as builder
+FROM node:20-alpine as builder
 
 # Accept build arguments for environment variables
 # Railway will pass this as a build argument

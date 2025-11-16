@@ -50,9 +50,7 @@ This app helps advisors automatically create and post social media content after
 - ✅ Configurable automations per platform
 - ✅ Settings page for bot timing and automations
 
-## 🚀 Quick Start
 
-See [PROJECT_PLAN.md](./PROJECT_PLAN.md) for detailed implementation plan.
 
 ## 📁 Project Structure
 
@@ -181,10 +179,6 @@ Or use the deployment scripts:
 - **Linux/Mac**: `./deploy.sh production`
 - **Windows**: `.\deploy.ps1 production`
 
-## 🔐 Environment Variables
-
-See PROJECT_PLAN.md for complete list of required environment variables.
-For production deployment, see DEPLOYMENT_PLAN.md for environment configuration.
 
 ## 🧪 Testing
 

@@ -27,8 +27,22 @@ class Settings(BaseSettings):
     # Database
     DATABASE_URL: str = Field(
         default="postgresql+psycopg://postgres:postgres@localhost:5432/postmeeting",
-        description="PostgreSQL database URL"
+        description="PostgreSQL database URL (must use async driver: postgresql+psycopg:// or postgresql+asyncpg://)"
     )
+    
+    @field_validator("DATABASE_URL", mode="before")
+    @classmethod
+    def ensure_async_driver(cls, v: str) -> str:
+        """Ensure DATABASE_URL uses an async driver for PostgreSQL"""
+        if isinstance(v, str):
+            # If it's a PostgreSQL URL without an async driver, add psycopg
+            if v.startswith("postgresql://") and not v.startswith("postgresql+psycopg") and not v.startswith("postgresql+asyncpg"):
+                # Replace postgresql:// with postgresql+psycopg://
+                v = v.replace("postgresql://", "postgresql+psycopg://", 1)
+            # If it uses psycopg2 (sync), replace with psycopg (async)
+            elif "postgresql+psycopg2" in v:
+                v = v.replace("postgresql+psycopg2", "postgresql+psycopg", 1)
+        return v
     
     # Security - REQUIRED in production
     SECRET_KEY: str = Field(

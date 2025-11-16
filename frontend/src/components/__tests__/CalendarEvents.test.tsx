@@ -7,10 +7,10 @@ import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import React from 'react'
 import CalendarEvents from '../CalendarEvents'
-import api from '@/lib/api'
+import api from '@/lib'
 
 // Mock the API
-vi.mock('@/lib/api', () => ({
+vi.mock('@/lib', () => ({
   default: {
     get: vi.fn(),
     post: vi.fn(),

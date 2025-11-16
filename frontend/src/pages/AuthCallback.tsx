@@ -28,7 +28,7 @@ export default function AuthCallback() {
         } catch (error) {
           // Log error for debugging but don't show to user (they'll be redirected)
           // In production, this could be sent to error tracking service
-          if (process.env.NODE_ENV === 'development') {
+          if (import.meta.env.DEV) {
             console.error('Failed to get user info:', error)
           }
           // Clear token and redirect to login

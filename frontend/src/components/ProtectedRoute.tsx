@@ -15,7 +15,7 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
     const token = localStorage.getItem('token')
     if (token && !user) {
       api.get('/auth/me')
-        .then((response) => {
+        .then((response: any) => {
           setAuth(response.data, token)
         })
         .catch(() => {

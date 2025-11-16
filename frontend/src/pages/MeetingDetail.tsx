@@ -302,7 +302,7 @@ export default function MeetingDetail() {
                   </div>
                   <div className="bg-white border border-gray-200 rounded-xl p-6 md:p-8">
                     <div className="prose prose-sm max-w-none">
-                      {email.split('\n').map((line, index) => {
+                      {email.split('\n').map((line: string, index: number) => {
                         // Format subject line
                         if (line.startsWith('Subject:')) {
                           return (

@@ -2,15 +2,9 @@ import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 import path from 'path'
 import { fileURLToPath } from 'url'
-import { existsSync } from 'fs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-// Resolve src path - works whether vite.config.ts is at root or in a subdirectory
-let srcPath = path.resolve(__dirname, 'src')
-// Fallback: if src doesn't exist at __dirname/src, try current working directory
-if (!existsSync(srcPath)) {
-  srcPath = path.resolve(process.cwd(), 'src')
-}
+const srcPath = path.resolve(__dirname, 'src')
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -18,8 +12,8 @@ export default defineConfig({
   resolve: {
     alias: [
       {
-        find: /^@\/(.*)$/,
-        replacement: path.resolve(srcPath, '$1'),
+        find: '@',
+        replacement: srcPath,
       },
     ],
     extensions: ['.mjs', '.js', '.mts', '.ts', '.jsx', '.tsx', '.json'],

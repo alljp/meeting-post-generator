@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useToastContext } from '../contexts/ToastContext'
-import api from '@/lib/api.ts'
+import api from '@/lib/api'
 
 export default function Login() {
   const [loading, setLoading] = useState(false)

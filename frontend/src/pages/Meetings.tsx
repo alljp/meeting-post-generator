@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { format } from 'date-fns'
 import { Calendar, Users, FileText, Loader2, MessageSquare } from 'lucide-react'
-import api from '@/lib/api.ts'
+import api from '@/lib/api'
 import PlatformIcon from '../components/PlatformIcon'
 
 interface Attendee {

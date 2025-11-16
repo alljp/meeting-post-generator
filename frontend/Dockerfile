@@ -29,19 +29,17 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 
 # Copy nginx configuration as a template
 # nginx:alpine processes .template files in /etc/nginx/templates/ and creates configs in /etc/nginx/conf.d/
-# This allows environment variable substitution
+# Note: envsubst only supports ${VAR} syntax, not ${VAR:-default}
 COPY nginx.conf /etc/nginx/templates/default.conf.template
+
+# Copy entrypoint script to ensure PORT is set before envsubst processes the template
+# This runs BEFORE script 20-envsubst-on-templates.sh processes the template
+COPY entrypoint.sh /docker-entrypoint.d/10-set-port.sh
+RUN chmod +x /docker-entrypoint.d/10-set-port.sh
 
 # Copy healthcheck script
 COPY healthcheck.sh /healthcheck.sh
 RUN chmod +x /healthcheck.sh
-
-# nginx:alpine's docker-entrypoint.sh will automatically:
-# 1. Process templates from /etc/nginx/templates/*.template
-# 2. Substitute environment variables (like ${PORT:-80})
-# 3. Create configs in /etc/nginx/conf.d/
-# 4. Start nginx
-# No custom entrypoint script needed - nginx handles it automatically
 
 # Expose port (Railway will set PORT dynamically)
 EXPOSE 80

@@ -41,3 +41,4 @@ USER appuser
 # Note: Make sure app.tasks module exists and is properly configured
 CMD ["celery", "-A", "app.tasks", "worker", "--loglevel=info", "--concurrency=4"]
 
+

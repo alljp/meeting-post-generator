@@ -37,7 +37,12 @@ COPY --chown=appuser:appuser . .
 # Switch to non-root user
 USER appuser
 
-# Run Celery worker
+# Expose port for health checks
+# Railway will set PORT environment variable
+EXPOSE 9000
+
+# Run Celery worker with health check server
+# The health check server starts automatically when app.tasks is imported
 # Note: Make sure app.tasks module exists and is properly configured
 CMD ["celery", "-A", "app.tasks", "worker", "--loglevel=info", "--concurrency=4"]
 

@@ -1,0 +1,15 @@
+# Railway configuration for Celery Worker service
+# This file helps Railway understand how to build and deploy Celery workers
+
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile.celery"
+
+[deploy]
+# Health check path for Celery worker
+# The health check server runs on the PORT environment variable
+healthcheckPath = "/health"
+healthcheckTimeout = 60
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10
+

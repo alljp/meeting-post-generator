@@ -43,5 +43,21 @@ celery_app.conf.update(
 # Import tasks to register them
 from app.tasks import meeting_tasks  # noqa: E402
 
+# Start health check server in background for Railway
+# This allows Railway to verify the worker is running via HTTP health checks
+try:
+    from app.tasks.health_check import start_health_check_in_background
+    import os
+    
+    # Only start health check server if PORT is set (Railway sets this)
+    # or if explicitly enabled via environment variable
+    if os.environ.get("ENABLE_CELERY_HEALTH_CHECK", "true").lower() == "true":
+        health_check_port = int(os.environ.get("CELERY_HEALTH_CHECK_PORT", os.environ.get("PORT", 9000)))
+        start_health_check_in_background(health_check_port)
+        logger.info(f"Celery health check server enabled on port {health_check_port}")
+except Exception as e:
+    # Don't fail if health check server can't start
+    logger.warning(f"Failed to start health check server: {e}")
+
 __all__ = ["celery_app"]
 
